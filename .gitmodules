@@ -1,9 +1,3 @@
 [submodule "tracy"]
 	path = tracy
 	url = https://github.com/wolfpld/tracy/
-[submodule "cpp_opengl_triangle/external/nelua-lang"]
-	path = cpp_opengl_triangle/external/nelua-lang
-	url = https://github.com/edubart/nelua-lang
-[submodule "cpp_opengl_triangle/external/spdlog"]
-	path = cpp_opengl_triangle/external/spdlog
-	url = git@github.com:gabime/spdlog.git
