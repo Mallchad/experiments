@@ -3,6 +3,11 @@
 #include <math.h>        
 #include <float.h>
 
+#ifdef VAL_DEBUG
+    #define d_printf(...) printf(__VA_ARGS__)
+#else
+    #define d_printf(...)
+#endif
 
 double max_double(double a, double b)
 {	if (a>b){return a;}
@@ -37,8 +42,8 @@ double brent_me(double a, double b){
 	double max_tolerance=1E-14, s,c,d, f_a, f_b, f_c, f_s,swap,f_swap;
 	int flag=1,iteration_number=0,max_iterations=100;
 
-	f_a=f(a);printf("x %.26E\n",a);
-	f_b=f(b);printf("x %.26E\n",b);
+	f_a=f(a);d_printf("x %.26E\n",a);
+	f_b=f(b);d_printf("x %.26E\n",b);
 
 	if (f_a*f_b>0){	//Even number of roots in interval
 		return 0.0;
@@ -59,12 +64,12 @@ double brent_me(double a, double b){
 	while (iteration_number<max_iterations && fabs((b-a)/min_double(a,b))>max_tolerance && f_b!=0.0){
 		if (f_a!=f_c && f_b!=f_c){	//Inverse quadratic
 			s=a*f_b*f_c/((f_a-f_b)*(f_a-f_c))+b*f_a*f_c/((f_b-f_a)*(f_b-f_c))+c*f_a*f_b/((f_c-f_a)*(f_c-f_b));
-			printf("%d Q\n",iteration_number);
+			d_printf("%d Q\n",iteration_number);
 		}
 
 		else{	//Secant
 			s=b-f_b*(b-a)/(f_b-f_a);
-			printf("%d S\n",iteration_number);
+			d_printf("%d S\n",iteration_number);
 		}
 
 		if ( 	(a>b && s<b && s>(3.0*a+b)/4.0) ||
@@ -75,13 +80,13 @@ double brent_me(double a, double b){
 			(flag==0 && fabs(c-d)<max_tolerance) ){
 			s=(a+b)/2.0;
 			flag=1;
-			printf("%d B\n",iteration_number);
+			d_printf("%d B\n",iteration_number);
 		}
 		else{
 			flag=0;
 		}
 
-		f_s=f(s);printf("x %.26E\n",s);
+		f_s=f(s);d_printf("x %.26E\n",s);
 		d=c;
 		c=b;
 		f_c=f_b;
@@ -101,7 +106,7 @@ double brent_me(double a, double b){
 			a=b;
 			f_a=f_b;
 			b=swap;f_b=f_swap;}
-		printf("%E %E %E %E\n",a,b,c,s);
+		d_printf("%E %E %E %E\n",a,b,c,s);
 
 		iteration_number++;
 
@@ -122,8 +127,8 @@ double brentq(double xa, double xb)
     int iter=100;
     double xtol=1E-14, rtol=1E-14;
 
-    fpre = f(xpre);printf("x %.26E\n",xpre);
-    fcur = f(xcur);printf("x %.26E\n",xcur);
+    fpre = f(xpre);d_printf("x %.26E\n",xpre);
+    fcur = f(xcur);d_printf("x %.26E\n",xcur);
     if (fpre == 0) {
         return xpre;
     }
@@ -160,14 +165,14 @@ double brentq(double xa, double xb)
             if (xpre == xblk) {
                 /* interpolate */
                 stry = -fcur*(xcur - xpre)/(fcur - fpre);
-                printf("%d S\n",i);
+                d_printf("%d S\n",i);
             }
             else {
                 /* extrapolate */
                 dpre = (fpre - fcur)/(xpre - xcur);
                 dblk = (fblk - fcur)/(xblk - xcur);
                 stry = -fcur*(fblk*dblk - fpre*dpre)/(dblk*dpre*(fblk - fpre));
-                printf("%d Q\n",i);
+                d_printf("%d Q\n",i);
             }
 
             if (2*fabs(stry) < MIN(fabs(spre), 3*fabs(sbis) - delta)) {
@@ -179,14 +184,14 @@ double brentq(double xa, double xb)
                 /* bisect */
                 spre = sbis;
                 scur = sbis;
-                printf("%d B\n",i);
+                d_printf("%d B\n",i);
             }
         }
         else {
             /* bisect */
             spre = sbis;
             scur = sbis;
-            printf("%d B\n",i);
+            d_printf("%d B\n",i);
         }
 
         xpre = xcur;
@@ -198,12 +203,12 @@ double brentq(double xa, double xb)
             xcur += (sbis > 0 ? delta : -delta);
         }
 
-        fcur = f(xcur);printf("x %.26E\n",xcur);
+        fcur = f(xcur);d_printf("x %.26E\n",xcur);
     }
     return xcur;
 }
 
-double brenth(double xa, double xb)
+double brenth(const double xa, const double xb)
 {
     double xpre = xa, xcur = xb;
     double xblk = 0., fpre, fcur, fblk = 0., spre = 0., scur = 0., sbis;
@@ -214,8 +219,8 @@ double brenth(double xa, double xb)
     int iter=100;
     double xtol=1E-14, rtol=1E-14;
 
-    fpre = f(xpre);printf("x %.26E\n",xpre);
-    fcur = f(xcur);printf("x %.26E\n",xcur);
+    fpre = f(xpre);d_printf("x %.26E\n",xpre);
+    fcur = f(xcur);d_printf("x %.26E\n",xcur);
     if (fpre == 0) {
         return xpre;
     }
@@ -252,14 +257,14 @@ double brenth(double xa, double xb)
             if (xpre == xblk) {
                 /* interpolate */
                 stry = -fcur*(xcur - xpre)/(fcur - fpre);
-                printf("%d S\n",i);
+                d_printf("%d S\n",i);
             }
             else {
                 /* extrapolate */
                 dpre = (fpre - fcur)/(xpre - xcur);
                 dblk = (fblk - fcur)/(xblk - xcur);
                 stry = -fcur*(fblk - fpre)/(fblk*dpre - fpre*dblk);
-                printf("%d H\n",i);
+                d_printf("%d H\n",i);
             }
 
             if (2*fabs(stry) < MIN(fabs(spre), 3*fabs(sbis) - delta)) {
@@ -271,14 +276,14 @@ double brenth(double xa, double xb)
                 /* bisect */
                 spre = sbis;
                 scur = sbis;
-                printf("%d B\n",i);
+                d_printf("%d B\n",i);
             }
         }
         else {
             /* bisect */
             spre = sbis;
             scur = sbis;
-            printf("%d B\n",i);
+            d_printf("%d B\n",i);
         }
 
         xpre = xcur;
@@ -290,7 +295,7 @@ double brenth(double xa, double xb)
             xcur += (sbis > 0 ? delta : -delta);
         }
 
-        fcur = f(xcur);printf("x %.26E\n",xcur);
+        fcur = f(xcur);d_printf("x %.26E\n",xcur);
     }
     return xcur;
 }
@@ -299,12 +304,12 @@ double brenth(double xa, double xb)
 int main() 
 {
 	double brent_result=brent_me(1.5,3.0);
-  	printf("%.26E, %.26E \n",brent_result,f(brent_result));
-  	printf("\n");
+  	d_printf("%.26E, %.26E \n",brent_result,f(brent_result));
+  	d_printf("\n");
 	double brent_result2=brentq(1.5,3.0);
-  	printf("%.26E, %.26E \n",brent_result2,f(brent_result2));
-  	printf("\n");
+  	d_printf("%.26E, %.26E \n",brent_result2,f(brent_result2));
+  	d_printf("\n");
 	double brent_result3=brenth(1.5,3.0);
-  	printf("%.26E, %.26E \n",brent_result3,f(brent_result3));
+  	d_printf("%.26E, %.26E \n",brent_result3,f(brent_result3));
 }
 
