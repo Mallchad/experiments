@@ -25,14 +25,19 @@ fn main() {
         vec.push((key, i));
     }
 
-    let mut cache_crusher = Vec::<(usize, u64)>::new();
+    let mut cache_crusher = Vec::<u64>::new();
 
     // Obliterates the CPU cache and invalidates everything
     if crush_the_cache
     {
         let crush_start = std::time::Instant::now();
-        let random = r.gen();
-        cache_crusher.resize(32_000_000, (random, random as u64));
+        let random: u64 = r.gen();
+        cache_crusher.resize(32_000_000, random);
+        for i in 1..100_000
+        {
+            let r_i: u64 = r.gen_range(0..32_000_000);
+            cache_crusher[ r_i as usize ] = random * 64;
+        }
         cache_crusher[152_010] = r.gen();
         let crush_elapsed = crush_start.elapsed();
         println!("crush elapsed: {crush_elapsed:?}");
@@ -43,7 +48,7 @@ fn main() {
     println!("Lookup Entries");
     for x in random_entries
     {
-        map.insert(x, 0);
+        map.insert(x, x as u64);
         map.get(&x);
         println!("{x}");
         let random: usize = r.gen_range(0..1000);
@@ -90,9 +95,10 @@ fn main() {
 
     // Multiple entry hash-varient
     let mut count = 0;
-    let i_hm = std::time::Instant::now();
     let mut _map_results = Vec::<u64>::new();
     _map_results.reserve(100);
+
+    let i_hm = std::time::Instant::now();
     for i in random_entries
     {
         count += 1;
@@ -101,4 +107,5 @@ fn main() {
     let elapsed_hm = i_hm.elapsed();
     println!("map multiple lookups: {elapsed_hm:?}");
     println!("map iterations: {count}");
+    println!("map read for deoptimizaiton: {_map_results:?}");
 }
