@@ -1,33 +1,20 @@
-
+#[allow(unused_parens)]
 use rand::Rng;
 
-fn main() {
-    // Performance Tunables
-    // If the memory isn't in cache it incurs a large performance penalty
-    // 'Pre-caching' or 'pre-fetching' is act of getting the memory ahead of time.
-    // Failing to find memory in cache is called a 'cache miss'
-    let precache = false;
+// Performance Tunables
+// If the memory isn't in cache it incurs a large performance penalty
+// 'Pre-caching' or 'pre-fetching' is act of getting the memory ahead of time.
+// Failing to find memory in cache is called a 'cache miss'
+static precache: bool = false;  // WARNING: Broken
 
-    // If other operations do operations that need large amounts of cache it will evict
-    // previous cache lines, thereby degrading performance. This is why locality is important
-    let crush_the_cache = true;
-    println!("Precaching Enabled: {precache}\nCache Crushing Enabled: {crush_the_cache}");
+// If other operations do operations that need large amounts of cache it will evict
+// previous cache lines, thereby degrading performance. This is why locality is important
+static crush_the_cache: bool = false;
 
-    let mut map = std::collections::HashMap::<usize, u64>::new();
-    let mut vec = Vec::<(usize, u64)>::new();
+// Obliterates the CPU cache and invalidates everything, or tries to anyway.
+fn crush_cache( cache_crusher: &mut Vec::<u64> )
+{
     let mut r = rand::thread_rng();
-
-    vec.resize(1000, (0, 0));
-    vec.resize(0, (0, 0));
-    for i in 0..1000_u64 {
-        let key: usize = r.gen();
-        map.insert(key, i);
-        vec.push((key, i));
-    }
-
-    let mut cache_crusher = Vec::<u64>::new();
-
-    // Obliterates the CPU cache and invalidates everything
     if crush_the_cache
     {
         let crush_start = std::time::Instant::now();
@@ -42,6 +29,26 @@ fn main() {
         let crush_elapsed = crush_start.elapsed();
         println!("crush elapsed: {crush_elapsed:?}");
     }
+}
+
+fn main() {
+
+    println!("Precaching Enabled: {precache}\nCache Crushing Enabled: {crush_the_cache}");
+
+    let mut map = std::collections::HashMap::<usize, u64>::new();
+    let mut vec = Vec::<(usize, u64)>::new();
+    let mut r = rand::thread_rng();
+    let mut cache_crusher = Vec::<u64>::new();
+
+    vec.resize(1000, (0, 0));
+    vec.resize(0, (0, 0));
+    for i in 0..1000_u64 {
+        let key: usize = r.gen();
+        map.insert(key, i);
+        vec.push((key, i));
+    }
+
+    crush_cache( &mut cache_crusher );
 
     // Setup entries to find
     let random_entries = [69, 23, 42, 15, 152];
@@ -58,7 +65,7 @@ fn main() {
     println!("");
 
     let i = std::time::Instant::now();
-    let result = map.get(&69).unwrap();
+    let _result = map.get(&69).unwrap();
     let elapsed = i.elapsed();
     println!("map single lookup: {elapsed:?}");
 
@@ -76,7 +83,7 @@ fn main() {
     // Loop Varient
     let mut count = 0;
     let i = std::time::Instant::now();
-    for (k, v) in &vec
+    for (k, _v) in &vec
     {
         count += 1;             // Comment for performance
         if (*k == 69) { break; }
@@ -85,6 +92,7 @@ fn main() {
     println!("vec single lookup loop: {elapsed:?}");
     println!("vec iterations: {count}");
 
+    crush_cache( &mut cache_crusher );
     // find() variant
     let mut count = 0;
     let i = std::time::Instant::now();
@@ -93,6 +101,23 @@ fn main() {
     println!("vec single lookup find() function reference: {elapsed:?}");
     println!("vec iterations: {count}");
 
+    crush_cache( &mut cache_crusher );
+    println!("\nUnsafe 'vec' varients");
+    unsafe
+    {
+        // Loop Varient
+        let mut count = 0;
+        let i = std::time::Instant::now();
+        for i in 0 .. vec.len()
+        {
+            // count += 1;             // Comment for performance
+            if (vec.get_unchecked(i).0 == 69) { break; }
+        }
+        let elapsed = i.elapsed();
+        println!("vec single lookup loop: {elapsed:?}");
+        println!("vec iterations: {count}");
+    }
+    crush_cache( &mut cache_crusher );
     // Multiple entry hash-varient
     let mut count = 0;
     let mut _map_results = Vec::<u64>::new();
