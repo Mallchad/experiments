@@ -9,7 +9,7 @@ static precache: bool = false;  // WARNING: Broken
 
 // If other operations do operations that need large amounts of cache it will evict
 // previous cache lines, thereby degrading performance. This is why locality is important
-static crush_the_cache: bool = false;
+static crush_the_cache: bool = true;
 
 // Obliterates the CPU cache and invalidates everything, or tries to anyway.
 fn crush_cache( cache_crusher: &mut Vec::<u64> )
@@ -27,7 +27,7 @@ fn crush_cache( cache_crusher: &mut Vec::<u64> )
         }
         cache_crusher[152_010] = r.gen();
         let crush_elapsed = crush_start.elapsed();
-        println!("crush elapsed: {crush_elapsed:?}");
+        println!("\ncrush elapsed: {crush_elapsed:?}");
     }
 }
 
@@ -48,8 +48,6 @@ fn main() {
         vec.push((key, i));
     }
 
-    crush_cache( &mut cache_crusher );
-
     // Setup entries to find
     let random_entries = [69, 23, 42, 15, 152];
     println!("Lookup Entries");
@@ -62,13 +60,17 @@ fn main() {
         vec[ random ] = (x, x as u64);
     }
     vec[50] = (0, 69);
+    // SpacingO
     println!("");
 
+    crush_cache( &mut cache_crusher );
     let i = std::time::Instant::now();
     let _result = map.get(&69).unwrap();
     let elapsed = i.elapsed();
     println!("map single lookup: {elapsed:?}");
 
+    // Start Destroying the cache ahead of the first lookup
+    crush_cache( &mut cache_crusher );
     // Pre-fetch all of 'vec' again to ensure the cache is hot and avoid cache misses
     if precache
     {
@@ -107,13 +109,15 @@ fn main() {
     {
         // Loop Varient
         let mut count = 0;
+        let mut yes = true;
         let i = std::time::Instant::now();
         for i in 0 .. vec.len()
         {
-            // count += 1;             // Comment for performance
-            if (vec.get_unchecked(i).0 == 69) { break; }
+            count += 1;             // Comment for performance
+            if (vec.get_unchecked(i).0 == 69) { yes = true; break; }
         }
         let elapsed = i.elapsed();
+        if (yes) { println!( "deoptimization"); }
         println!("vec single lookup loop: {elapsed:?}");
         println!("vec iterations: {count}");
     }
