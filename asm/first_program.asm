@@ -6,6 +6,7 @@ global _start
 _start:
     main_loop:
     xor rax, rax
+    add rax, 69
     jmp main_loop
 
     xor edi, edi

@@ -9,3 +9,7 @@ rand = "0.8.5"
 [[bin]]
 name = "hash_or_vec"
 path = "hash_or_vec.rs"
+
+[profile.release-debug]
+inherits = "release"
+debug = true
