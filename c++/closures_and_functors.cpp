@@ -225,7 +225,7 @@ struct generic_procedure< t_return( t_args... ) >
 
     template <typename... t_forward>
     t_return invoke( t_forward&&... args)
-    { return impl->invoke( std::forward<t_args>(args)... ); }
+    { return impl != nullptr ? impl->invoke( std::forward<t_args>(args)... ) : false; }
 
     template <typename... t_forward>
     t_return
