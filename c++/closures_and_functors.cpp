@@ -223,11 +223,13 @@ struct generic_procedure< t_return( t_args... ) >
             { std::forward<t_procedure>( proc ), context };
     }
 
-    t_return invoke( t_args&& ... args)
+    template <typename... t_forward>
+    t_return invoke( t_forward&&... args)
     { return impl->invoke( std::forward<t_args>(args)... ); }
 
+    template <typename... t_forward>
     t_return
-    operator () ( t_args&& ... args )
+    operator () ( t_forward&&... args )
     { return this->invoke( std::forward<t_args>(args)... ); }
 
     // NOTE: It's on the stack, doesn't need to be freed. Reconsider if it moves onto the heap.
