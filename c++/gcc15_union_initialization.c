@@ -45,7 +45,7 @@ taint_the_stack()
 {
     enum{ size = 1123123 };
 
-    /** Okay APARENTLY const in C is different to C++ and has external linkage
+    /** Okay APPARENTLY const in C is different to C++ and has external linkage
         This has the side effect of turning arrays into VALs which can't be optimized correctly
         FML. This made testing SO HARD */
     //static const int size = 1123123;
