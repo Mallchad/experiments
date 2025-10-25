@@ -3,6 +3,11 @@
 
 #include <functional>
 
+struct functor
+{
+    int invoke( int arg ) { return arg * 5; }
+};
+
 void callback(int) {}
 
 int main()
@@ -31,4 +36,14 @@ int main()
     {
          callback(1);
     };
+
+    // C++ member function
+    using functor_callback_t = int (functor::*)(int);
+    functor func10_context;
+    functor_callback_t func10 = &functor::invoke;
+    ((func10_context).*(func10))(1);
+
+    // Member function to std::function
+    std::function func11 = &functor::invoke;
+
 }
